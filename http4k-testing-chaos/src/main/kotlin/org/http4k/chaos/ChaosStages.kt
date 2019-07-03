@@ -82,6 +82,14 @@ object ChaosStages {
     }
 }
 
+sealed class ChaosStage(val type: String) {
+    abstract val until: ChaosTrigger?
+}
+
+data class Wait(override val until: ChaosTrigger?) : ChaosStage("wait")
+data class Repeat(val stages: List<ChaosStage>, override val until: ChaosTrigger?) : ChaosStage("repeat")
+data class ATrigger(val behaviour: ChaosBehaviour, val trigger: ChaosTrigger, override val until: ChaosTrigger?) : ChaosStage("trigger")
+
 fun JsonNode.asStage(clock: Clock = Clock.systemUTC()): Stage {
     val baseStage = when (asNullable<String>("type")) {
         "wait" -> Wait

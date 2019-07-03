@@ -212,6 +212,19 @@ object ChaosBehaviours {
     }
 }
 
+sealed class ChaosBehaviour(val type: String)
+data class LatencyBehaviour(val min: Duration, val max: Duration) : ChaosBehaviour("latency")
+class ThrowException : ChaosBehaviour("throw")
+data class ReturnStatus(val status: Int) : ChaosBehaviour("status")
+class NoBody : ChaosBehaviour("body")
+class SnipBody : ChaosBehaviour("snip")
+class SnipRequest(val limit: Int? = 0) : ChaosBehaviour("sniprequest")
+class EatMemory : ChaosBehaviour("memory")
+class KillProcess : ChaosBehaviour("kill")
+class StackOverflow : ChaosBehaviour("overflow")
+class BlockThread : ChaosBehaviour("block")
+class None : ChaosBehaviour("none")
+
 internal fun JsonNode.asBehaviour() = when (nonNullable<String>("type")) {
     "latency" -> Latency(nonNullable("min"), nonNullable("max"))
     "throw" -> ThrowException(RuntimeException(nonNullable<String>("message")))

@@ -146,6 +146,20 @@ object ChaosTriggers {
     }
 }
 
+sealed class ChaosTrigger(val type: String)
+data class Deadline(val endTime: Instant) : ChaosTrigger("deadline")
+data class Delay(val period: Instant) : ChaosTrigger("delay")
+data class Countdown(val count: Instant) : ChaosTrigger("countdown")
+data class Once(val count: Instant, val trigger: ChaosTrigger) : ChaosTrigger("once")
+data class PercentageBased(val percentage: Int) : ChaosTrigger("once")
+data class MatchRequest(val method: String? = null,
+                        val path: Regex? = null,
+                        val queries: Map<String, Regex>? = null,
+                        val headers: Map<String, Regex>? = null,
+                        val body: Regex? = null) : ChaosTrigger("once")
+
+class Always : ChaosTrigger("always")
+
 internal fun JsonNode.asTrigger(clock: Clock = Clock.systemUTC()): Trigger = when (nonNullable<String>("type")) {
     "deadline" -> Deadline(nonNullable("endTime"), clock)
     "delay" -> Delay(nonNullable("period"), clock)
