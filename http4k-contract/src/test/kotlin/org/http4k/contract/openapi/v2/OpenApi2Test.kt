@@ -63,4 +63,48 @@ class OpenApi2Test : ContractRendererContract<JsonNode>(
         approver.assertApproved(router(Request(Method.GET, "/")))
     }
 
+    @Test
+    fun `renders more than 2 chained security configurations`(approver: Approver) {
+        val router = "/" bind contract {
+            renderer = rendererToUse
+            security = ImplicitOAuthSecurity(
+                    name = "oauth2-1",
+                    authorizationUrl = Uri.of(""),
+                    extraFields = mapOf(
+                            "x-google-issuer" to "example-google-issuer",
+                            "x-google-jwks_uri" to "http://example.org/jwks",
+                            "x-google-audiences" to "client-id1,client-id2"
+                    ),
+                    filter = Filter.NoOp
+            ).or(
+                    ImplicitOAuthSecurity(
+                            name = "oauth2-2",
+                            authorizationUrl = Uri.of(""),
+                            extraFields = mapOf(
+                                    "x-google-issuer" to "example-google-issuer",
+                                    "x-google-jwks_uri" to "http://example.org/jwks",
+                                    "x-google-audiences" to "client-id1,client-id2"
+                            ),
+                            filter = Filter.NoOp
+                    ).or(
+                        ImplicitOAuthSecurity(
+                                name = "oauth2-3",
+                                authorizationUrl = Uri.of(""),
+                                extraFields = mapOf(
+                                        "x-google-issuer" to "example-google-issuer",
+                                        "x-google-jwks_uri" to "http://example.org/jwks",
+                                        "x-google-audiences" to "client-id1,client-id2"
+                                ),
+                                filter = Filter.NoOp
+                        )
+                )
+
+            )
+            routes += "/example" bindContract Method.GET to { Response(Status.OK) }
+        }
+
+        approver.assertApproved(router(Request(Method.GET, "/")))
+
+    }
+
 }
